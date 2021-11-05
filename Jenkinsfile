@@ -4,7 +4,7 @@ pipeline{
         IMAGE_TAG = "${BUILD_TAG}"
         CONTAINER_NAME = "alpinehelloworld"
         STAGING = "ynov-frazer-staging"
-        PRODUCTION "ynov-frazer-production"
+        PRODUCTION = "ynov-frazer-production"
     }
     agent none
 
