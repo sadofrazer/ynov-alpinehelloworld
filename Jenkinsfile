@@ -54,6 +54,19 @@ pipeline{
             }
         }
 
+        stage ('Push image on dockerhub an delete it'){
+            agent any
+            steps{
+                script{
+                    sh '''
+                       docker login -u sadofrazer -p ${PASSWORD}
+                       docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                       docker rmi ${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
+                }
+            }
+        }
+
         stage ('Push image and deploy it in staging env'){
             when{
                 expression{ GIT_BRANCH == 'origin/master'}
