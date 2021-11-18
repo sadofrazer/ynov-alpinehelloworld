@@ -75,7 +75,7 @@ pipeline{
             steps{
                 script{
                     sh'''
-                      docker run -d --name ${CONTAINER_NAME} -e PORT=5000 -p 8080:5000 ${IMAGE_NAME}:${IMAGE_TAG}
+                      sudo docker run -d --name ${CONTAINER_NAME} -e PORT=5000 -p 8080:5000 ${IMAGE_NAME}:${IMAGE_TAG}
                       sleep 5
                       curl http://localhost:8080 | grep -q "Hello world!"
 
