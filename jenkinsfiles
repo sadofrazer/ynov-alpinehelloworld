@@ -71,7 +71,7 @@ pipeline{
             when{
                 expression{ GIT_BRANCH == 'origin/master'}
             }
-            agent label prod
+            agent { label 'prod' }
             steps{
                 script{
                     sh'''
