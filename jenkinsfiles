@@ -1,0 +1,89 @@
+pipeline{
+    environment{
+        IMAGE_NAME = "sadofrazer/alpinehelloworld"
+        IMAGE_TAG = "${BUILD_TAG}"
+        CONTAINER_NAME = "alpinehelloworld"
+        STAGING = "ynov-frazer-staging"
+        PRODUCTION = "ynov-frazer-production"
+    }
+    agent none
+
+    stages{
+
+        stage ('Build Stage'){
+            agent any
+            steps{
+                script{
+                    sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                }
+            }
+        }
+
+        stage ('Run container based on builded image'){
+            agent any
+            steps{
+                script{
+                    sh '''
+                       docker run -d --name ${CONTAINER_NAME} -e PORT=5000 -p 5000:5000 ${IMAGE_NAME}:${IMAGE_TAG}
+                       sleep 5
+                    '''
+                }
+            }
+        }
+
+        stage ('Test image'){
+            agent any
+            steps{
+                script{
+                    sh '''
+                       curl http://localhost:5000 | grep -q "Hello world!"
+                    '''
+                }
+            }
+        }
+
+        stage ('Delete Container'){
+            agent any
+            steps{
+                script{
+                    sh '''
+                       docker stop ${CONTAINER_NAME}
+                       docker rm ${CONTAINER_NAME}
+                    '''
+                }
+            }
+        }
+
+        stage ('Push image on dockerhub an delete it'){
+            agent any
+            steps{
+                script{
+                    sh '''
+                       docker login -u sadofrazer -p ${PASSWORD}
+                       docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                       docker rmi ${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
+                }
+            }
+        }
+
+        stage ('Push image and deploy it in staging env'){
+            when{
+                expression{ GIT_BRANCH == 'origin/master'}
+            }
+            agent label prod
+            }
+            steps{
+                script{
+                    sh'''
+                      docker run -d --name ${CONTAINER_NAME} -e PORT=5000 -p 8080:5000 ${IMAGE_NAME}:${IMAGE_TAG}
+                      sleep 5
+                      curl http://localhost:8080 | grep -q "Hello world!"
+
+                    '''
+                }
+            }
+        }
+
+    }
+}
