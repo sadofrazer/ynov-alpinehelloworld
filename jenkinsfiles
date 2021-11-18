@@ -72,7 +72,6 @@ pipeline{
                 expression{ GIT_BRANCH == 'origin/master'}
             }
             agent label prod
-            }
             steps{
                 script{
                     sh'''
