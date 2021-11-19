@@ -1,3 +1,5 @@
+/* import shared library */
+@Library('ynov-slackNotifier')_
 pipeline{
     environment{
         IMAGE_NAME = "sadofrazer/alpinehelloworld"
@@ -114,7 +116,8 @@ pipeline{
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script{
                       sh '''
-                       docker rm -f ${CONTAINER_NAME}
+                       docker stop ${CONTAINER_NAME}
+                       docker rm ${CONTAINER_NAME}
                        docker run -d --name ${CONTAINER_NAME} -e PORT=5000 -p 80:5000 ${IMAGE_NAME}:${IMAGE_TAG}
                        sleep 5
                        curl http://localhost:80 | grep -q "Hello world!"
@@ -123,15 +126,14 @@ pipeline{
                     }
                 }
             }
-        } 
+        }
 
     }
     post {
-        success{
-            slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-        }
-        failure {
-            slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        always{
+            script{
+                slackNotifier currentBuild.result
+            }
         }
     }
 }
