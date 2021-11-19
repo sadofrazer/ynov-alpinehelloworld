@@ -109,7 +109,7 @@ pipeline{
         }
 
         stage ('Run container on prod host'){
-          agent { label 'prod'}
+            agent { label 'prod'}
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 steps{
                     script{
@@ -123,9 +123,7 @@ pipeline{
                     }
                 }
             }
-        }
-
-        
+        } 
 
     }
     post {
